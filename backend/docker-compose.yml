@@ -1,0 +1,162 @@
+version: '3.8'
+
+services:
+  # Database
+  postgres:
+    image: postgres:15
+    container_name: miora-postgres
+    environment:
+      POSTGRES_DB: miora
+      POSTGRES_USER: miora_user
+      POSTGRES_PASSWORD: miora_password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./spring-boot/src/main/resources/db/migration:/docker-entrypoint-initdb.d
+    ports:
+      - "5432:5432"
+    networks:
+      - miora-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U miora_user -d miora"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Redis for caching and session management
+  redis:
+    image: redis:7-alpine
+    container_name: miora-redis
+    ports:
+      - "6379:6379"
+    networks:
+      - miora-network
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Spring Boot Backend Service
+  miora-backend:
+    build:
+      context: ./spring-boot
+      dockerfile: Dockerfile
+    container_name: miora-backend
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=miora
+      - DB_USERNAME=miora_user
+      - DB_PASSWORD=miora_password
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - ML_SERVICE_URL=http://miora-ml-service:8000
+      - JWT_SECRET=your-super-secret-jwt-key-change-in-production
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - miora-network
+    volumes:
+      - ./data/avatars:/opt/miora/data/avatars
+      - ./data/garments:/opt/miora/data/garments
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Python ML/CV Service
+  miora-ml-service:
+    build:
+      context: ./python-ml-service
+      dockerfile: Dockerfile
+    container_name: miora-ml-service
+    environment:
+      - DEBUG=false
+      - REDIS_URL=redis://redis:6379/0
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - SPRING_BOOT_BASE_URL=http://miora-backend:8080
+      - UPLOAD_DIR=/app/data/uploads
+      - AVATAR_OUTPUT_DIR=/app/data/avatars
+      - GARMENT_OUTPUT_DIR=/app/data/garments
+      - MODEL_CACHE_DIR=/app/data/models
+    ports:
+      - "8000:8000"
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - miora-network
+    volumes:
+      - ./data/ml-uploads:/app/data/uploads
+      - ./data/ml-avatars:/app/data/avatars
+      - ./data/ml-garments:/app/data/garments
+      - ./data/ml-models:/app/data/models
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Celery Worker for background processing
+  miora-celery-worker:
+    build:
+      context: ./python-ml-service
+      dockerfile: Dockerfile
+    container_name: miora-celery-worker
+    command: celery -A app.celery_app worker --loglevel=info
+    environment:
+      - DEBUG=false
+      - REDIS_URL=redis://redis:6379/0
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - SPRING_BOOT_BASE_URL=http://miora-backend:8080
+      - UPLOAD_DIR=/app/data/uploads
+      - AVATAR_OUTPUT_DIR=/app/data/avatars
+      - GARMENT_OUTPUT_DIR=/app/data/garments
+      - MODEL_CACHE_DIR=/app/data/models
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - miora-network
+    volumes:
+      - ./data/ml-uploads:/app/data/uploads
+      - ./data/ml-avatars:/app/data/avatars
+      - ./data/ml-garments:/app/data/garments
+      - ./data/ml-models:/app/data/models
+
+  # Nginx reverse proxy (optional for production)
+  nginx:
+    image: nginx:alpine
+    container_name: miora-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/ssl:/etc/nginx/ssl
+    depends_on:
+      - miora-backend
+      - miora-ml-service
+    networks:
+      - miora-network
+    profiles:
+      - production
+
+networks:
+  miora-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  redis_data: 

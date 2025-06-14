@@ -1,0 +1,160 @@
+server:
+  port: 8080
+  error:
+    include-message: always
+    include-binding-errors: always
+
+spring:
+  application:
+    name: miora-backend
+  
+  # Database Configuration - PostgreSQL with R2DBC
+  r2dbc:
+    url: r2dbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:miora}
+    username: ${DB_USERNAME:miora_user}
+    password: ${DB_PASSWORD:miora_password}
+    pool:
+      initial-size: 10
+      max-size: 20
+      max-idle-time: 30m
+      validation-query: SELECT 1
+  
+  # Redis Configuration for Sessions and Caching
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      timeout: 2000ms
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+  
+  # Email Configuration
+  mail:
+    host: ${MAIL_HOST:smtp.gmail.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+  
+  # JSON Configuration
+  jackson:
+    default-property-inclusion: non_null
+    serialization:
+      write-dates-as-timestamps: false
+
+# Security Configuration
+security:
+  jwt:
+    secret: ${JWT_SECRET:miora-super-secret-key-change-in-production}
+    access-token-expiration: 900000  # 15 minutes
+    refresh-token-expiration: 604800000  # 7 days
+  oauth2:
+    google:
+      client-id: ${GOOGLE_CLIENT_ID:}
+      client-secret: ${GOOGLE_CLIENT_SECRET:}
+    apple:
+      client-id: ${APPLE_CLIENT_ID:}
+      private-key: ${APPLE_PRIVATE_KEY:}
+
+# Miora Custom Configuration
+miora:
+  # ML/CV Service Configuration
+  ml-service:
+    base-url: ${ML_SERVICE_URL:http://localhost:8000}
+    timeout: 30s
+    retry-attempts: 3
+  
+  # File Upload Configuration
+  upload:
+    max-file-size: 10MB
+    allowed-image-types: jpg,jpeg,png,webp
+    avatar-storage-path: ${AVATAR_STORAGE_PATH:/var/miora/avatars}
+    garment-storage-path: ${GARMENT_STORAGE_PATH:/var/miora/garments}
+  
+  # Business Rules
+  business:
+    max-avatars-per-user: 5
+    max-garments-per-user: 100
+    verification-token-expiry: 24h
+    password-reset-token-expiry: 1h
+    max-login-attempts: 5
+    account-lockout-duration: 15m
+
+# CORS Configuration
+cors:
+  allowed-origins: ${ALLOWED_ORIGINS:http://localhost:3000,http://localhost:5173}
+  allowed-methods: GET,POST,PUT,DELETE,OPTIONS
+  allowed-headers: "*"
+  allow-credentials: true
+
+# Monitoring and Observability
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+
+# Logging Configuration
+logging:
+  level:
+    com.miora: ${LOG_LEVEL:INFO}
+    org.springframework.security: ${SECURITY_LOG_LEVEL:INFO}
+    org.springframework.r2dbc: ${DB_LOG_LEVEL:WARN}
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+
+---
+# Development Profile
+spring:
+  config:
+    activate:
+      on-profile: dev
+  r2dbc:
+    url: r2dbc:postgresql://localhost:5432/miora_dev
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+miora:
+  ml-service:
+    base-url: http://localhost:8000
+
+logging:
+  level:
+    com.miora: DEBUG
+    org.springframework.security: DEBUG
+
+---
+# Production Profile
+spring:
+  config:
+    activate:
+      on-profile: prod
+
+miora:
+  upload:
+    avatar-storage-path: /opt/miora/data/avatars
+    garment-storage-path: /opt/miora/data/garments
+
+logging:
+  level:
+    com.miora: WARN
+    org.springframework.security: WARN 
