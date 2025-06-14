@@ -2,6 +2,7 @@ package com.miora.security;
 
 import org.springframework.security.authentication.ReactiveAuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
@@ -25,7 +26,7 @@ public class JwtAuthenticationManager implements ReactiveAuthenticationManager {
         return Mono.fromCallable(() -> {
             try {
                 if (jwtUtil.isTokenExpired(token) || !jwtUtil.isAccessToken(token)) {
-                    throw new RuntimeException("Token is expired or invalid");
+                    throw new BadCredentialsException("Token is expired or invalid");
                 }
                 
                 String userId = jwtUtil.getUserIdFromToken(token);
@@ -37,9 +38,16 @@ public class JwtAuthenticationManager implements ReactiveAuthenticationManager {
                 
                 Authentication auth = new UsernamePasswordAuthenticationToken(userId, null, authorities);
                 return auth;
+            } catch (BadCredentialsException e) {
+                throw e; // Re-throw BadCredentialsException as-is
             } catch (Exception e) {
-                throw new RuntimeException("Authentication failed", e);
+                throw new BadCredentialsException("Authentication failed", e);
             }
-        }).onErrorMap(throwable -> new RuntimeException("Authentication failed", throwable));
+        }).onErrorMap(throwable -> {
+            if (throwable instanceof BadCredentialsException) {
+                return throwable; // Keep BadCredentialsException unchanged
+            }
+            return new BadCredentialsException("Authentication failed", throwable);
+        });
     }
 } 

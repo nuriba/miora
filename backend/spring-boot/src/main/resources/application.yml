@@ -75,7 +75,7 @@ miora:
   
   # File Upload Configuration
   upload:
-    max-file-size: 10MB
+    max-file-size: 10485760  # 10MB in bytes
     allowed-image-types: jpg,jpeg,png,webp
     avatar-storage-path: ${AVATAR_STORAGE_PATH:/var/miora/avatars}
     garment-storage-path: ${GARMENT_STORAGE_PATH:/var/miora/garments}

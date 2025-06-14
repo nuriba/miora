@@ -42,7 +42,7 @@ miora:
     retry-attempts: 1
   
   upload:
-    max-file-size: 1MB
+    max-file-size: 1048576  # 1MB in bytes
     avatar-storage-path: /tmp/miora-test/avatars
     garment-storage-path: /tmp/miora-test/garments
   
