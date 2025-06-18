@@ -1,0 +1,1195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Miora - Virtual Fashion Try-On Platform</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            color: #333;
+            overflow-x: hidden;
+        }
+
+        /* Landing Page Styles */
+        .landing-page {
+            display: block;
+        }
+
+        .user-dashboard {
+            display: none;
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><polygon fill="%23ffffff08" points="0,1000 1000,0 1000,1000"/></svg>') no-repeat;
+            background-size: cover;
+        }
+
+        .landing-nav {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            padding: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 2rem;
+            font-weight: 700;
+            color: white;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .auth-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn {
+            padding: 0.75rem 2rem;
+            border: none;
+            border-radius: 50px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 1rem;
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: white;
+            border: 2px solid white;
+        }
+
+        .btn-outline:hover {
+            background: white;
+            color: #667eea;
+            transform: translateY(-2px);
+        }
+
+        .btn-primary {
+            background: white;
+            color: #667eea;
+            box-shadow: 0 4px 15px rgba(255,255,255,0.2);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255,255,255,0.3);
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 10;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 0 2rem;
+        }
+
+        .hero-text {
+            max-width: 800px;
+            color: white;
+        }
+
+        .hero-title {
+            font-size: clamp(3rem, 8vw, 6rem);
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            line-height: 1.1;
+            text-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+
+        .hero-subtitle {
+            font-size: clamp(1.2rem, 3vw, 1.8rem);
+            margin-bottom: 3rem;
+            opacity: 0.9;
+            line-height: 1.4;
+        }
+
+        .hero-cta {
+            display: flex;
+            gap: 2rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn-large {
+            padding: 1.2rem 3rem;
+            font-size: 1.2rem;
+            border-radius: 60px;
+        }
+
+        /* Features Section */
+        .features {
+            padding: 8rem 2rem;
+            background: linear-gradient(to bottom, #f8f9fa, #ffffff);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 4rem;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 4rem;
+            margin-top: 4rem;
+        }
+
+        .feature-card {
+            background: white;
+            padding: 3rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+            text-align: center;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+        }
+
+        .feature-icon {
+            font-size: 4rem;
+            margin-bottom: 2rem;
+            display: block;
+        }
+
+        .feature-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: #333;
+        }
+
+        .feature-description {
+            color: #666;
+            line-height: 1.6;
+        }
+
+        /* How It Works Section */
+        .how-it-works {
+            padding: 8rem 2rem;
+            background: #f8f9fa;
+        }
+
+        .steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 3rem;
+            margin-top: 4rem;
+        }
+
+        .step {
+            text-align: center;
+            position: relative;
+        }
+
+        .step-number {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: 700;
+            margin: 0 auto 2rem;
+        }
+
+        .step-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .step-description {
+            color: #666;
+            line-height: 1.5;
+        }
+
+        /* Demo Section */
+        .demo {
+            padding: 8rem 2rem;
+            background: white;
+            text-align: center;
+        }
+
+        .demo-video {
+            max-width: 800px;
+            margin: 4rem auto;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 20px;
+            padding: 3rem;
+            color: white;
+            min-height: 400px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+        }
+
+        /* CTA Section */
+        .cta-section {
+            padding: 8rem 2rem;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            text-align: center;
+            color: white;
+        }
+
+        .cta-title {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+        }
+
+        .cta-subtitle {
+            font-size: 1.3rem;
+            margin-bottom: 3rem;
+            opacity: 0.9;
+        }
+
+        /* Footer */
+        .footer {
+            background: #333;
+            color: white;
+            padding: 4rem 2rem 2rem;
+            text-align: center;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 3rem;
+            text-align: left;
+        }
+
+        .footer-section h3 {
+            margin-bottom: 1rem;
+        }
+
+        .footer-section a {
+            color: #ccc;
+            text-decoration: none;
+            line-height: 2;
+        }
+
+        .footer-section a:hover {
+            color: white;
+        }
+
+        .footer-bottom {
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid #555;
+            text-align: center;
+            color: #ccc;
+        }
+
+        /* User Dashboard Styles */
+        .app-container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .navbar {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 1rem 2rem;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #333;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: #667eea;
+        }
+
+        .user-menu {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+
+        .main-content {
+            margin-top: 80px;
+            flex: 1;
+            display: flex;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .sidebar {
+            width: 280px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-right: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 2rem 1.5rem;
+            height: calc(100vh - 80px);
+            overflow-y: auto;
+        }
+
+        .sidebar-section {
+            margin-bottom: 2rem;
+        }
+
+        .sidebar-section h3 {
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            color: #555;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .avatar-preview {
+            width: 100%;
+            height: 200px;
+            background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .avatar-placeholder {
+            width: 80px;
+            height: 120px;
+            background: rgba(102, 126, 234, 0.3);
+            border-radius: 40px 40px 10px 10px;
+            position: relative;
+        }
+
+        .avatar-head {
+            width: 30px;
+            height: 30px;
+            background: rgba(102, 126, 234, 0.5);
+            border-radius: 50%;
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .wardrobe-items {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+
+        .wardrobe-item {
+            aspect-ratio: 1;
+            background: linear-gradient(135deg, #ffecd2, #fcb69f);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+            font-size: 1.5rem;
+        }
+
+        .wardrobe-item:hover {
+            transform: scale(1.05);
+        }
+
+        .viewport-container {
+            flex: 1;
+            background: linear-gradient(135deg, #a8edea, #fed6e3);
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .viewport {
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, rgba(255, 255, 255, 0.1), transparent 70%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .avatar-3d {
+            width: 300px;
+            height: 500px;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+            border-radius: 150px 150px 50px 50px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(5px);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            font-size: 4rem;
+            color: rgba(102, 126, 234, 0.6);
+        }
+
+        .viewport-controls {
+            position: absolute;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 1rem;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 1rem;
+            border-radius: 25px;
+            backdrop-filter: blur(10px);
+        }
+
+        .control-btn {
+            width: 50px;
+            height: 50px;
+            border: none;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.3s ease;
+            font-size: 1.2rem;
+        }
+
+        .control-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .right-panel {
+            width: 320px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-left: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 2rem 1.5rem;
+            height: calc(100vh - 80px);
+            overflow-y: auto;
+        }
+
+        .fit-score {
+            background: linear-gradient(135deg, #a8e6cf, #88d8a3);
+            padding: 1.5rem;
+            border-radius: 15px;
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .fit-score-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #2d5a4a;
+        }
+
+        .fit-score-label {
+            color: #2d5a4a;
+            font-weight: 500;
+            margin-top: 0.5rem;
+        }
+
+        .size-recommendations {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .size-option {
+            flex: 1;
+            padding: 0.75rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .size-option.recommended {
+            border-color: #667eea;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .fab {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            transition: transform 0.3s ease;
+        }
+
+        .fab:hover {
+            transform: scale(1.1);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 3rem;
+            }
+            
+            .hero-cta {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .main-content {
+                flex-direction: column;
+            }
+            
+            .sidebar, .right-panel {
+                width: 100%;
+                height: auto;
+            }
+        }
+
+        /* Animations */
+        .fade-in {
+            animation: fadeIn 1s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .slide-up {
+            animation: slideUp 0.8s ease-out;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(100px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Landing Page -->
+    <div class="landing-page" id="landingPage">
+        <!-- Hero Section -->
+        <section class="hero">
+            <nav class="landing-nav">
+                <div class="logo">Miora</div>
+                <div class="auth-buttons">
+                    <a href="#" class="btn btn-outline" onclick="showSignIn()">Sign In</a>
+                    <a href="#" class="btn btn-primary" onclick="showSignUp()">Get Started</a>
+                </div>
+            </nav>
+            
+            <div class="hero-content fade-in">
+                <div class="hero-text">
+                    <h1 class="hero-title">Try Before You Buy</h1>
+                    <p class="hero-subtitle">Create your perfect 3D avatar and virtually try on any outfit with hyper-realistic simulation. Shop with confidence, reduce returns, and discover your perfect style.</p>
+                    <div class="hero-cta">
+                        <a href="#" class="btn btn-primary btn-large" onclick="showSignUp()">Start Your Virtual Wardrobe</a>
+                        <a href="#demo" class="btn btn-outline btn-large">Watch Demo</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Features Section -->
+        <section class="features">
+            <div class="container">
+                <h2 class="section-title slide-up">Why Choose Miora?</h2>
+                <div class="features-grid">
+                    <div class="feature-card slide-up">
+                        <span class="feature-icon">🎯</span>
+                        <h3 class="feature-title">Perfect Fit Guarantee</h3>
+                        <p class="feature-description">Our AI analyzes your body measurements and recommends the perfect size for every garment, reducing returns by up to 80%.</p>
+                    </div>
+                    
+                    <div class="feature-card slide-up">
+                        <span class="feature-icon">🔒</span>
+                        <h3 class="feature-title">Privacy First</h3>
+                        <p class="feature-description">Your body data stays on your device. We use advanced encryption to protect your privacy while providing personalized experiences.</p>
+                    </div>
+                    
+                    <div class="feature-card slide-up">
+                        <span class="feature-icon">✨</span>
+                        <h3 class="feature-title">Realistic Simulation</h3>
+                        <p class="feature-description">Experience hyper-realistic cloth physics that shows exactly how garments will drape, stretch, and move on your body.</p>
+                    </div>
+                    
+                    <div class="feature-card slide-up">
+                        <span class="feature-icon">👥</span>
+                        <h3 class="feature-title">Social Shopping</h3>
+                        <p class="feature-description">Share your outfits, get feedback from friends, and discover trending styles in our vibrant fashion community.</p>
+                    </div>
+                    
+                    <div class="feature-card slide-up">
+                        <span class="feature-icon">📱</span>
+                        <h3 class="feature-title">Cross-Platform</h3>
+                        <p class="feature-description">Seamlessly switch between web and mobile. Your avatar and wardrobe sync across all devices for shopping anywhere.</p>
+                    </div>
+                    
+                    <div class="feature-card slide-up">
+                        <span class="feature-icon">🌐</span>
+                        <h3 class="feature-title">Universal Compatibility</h3>
+                        <p class="feature-description">Works with any online store. Import clothes from any website or upload your own photos to try them on virtually.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- How It Works Section -->
+        <section class="how-it-works">
+            <div class="container">
+                <h2 class="section-title">How It Works</h2>
+                <div class="steps">
+                    <div class="step slide-up">
+                        <div class="step-number">1</div>
+                        <h3 class="step-title">Create Your Avatar</h3>
+                        <p class="step-description">Take a selfie or enter your measurements to create a hyper-realistic 3D avatar that matches your body perfectly.</p>
+                    </div>
+                    
+                    <div class="step slide-up">
+                        <div class="step-number">2</div>
+                        <h3 class="step-title">Import Clothes</h3>
+                        <p class="step-description">Add clothes from any website, upload photos, or browse our partner brands' latest collections.</p>
+                    </div>
+                    
+                    <div class="step slide-up">
+                        <div class="step-number">3</div>
+                        <h3 class="step-title">Virtual Try-On</h3>
+                        <p class="step-description">See how clothes look, fit, and move on your avatar with realistic physics simulation.</p>
+                    </div>
+                    
+                    <div class="step slide-up">
+                        <div class="step-number">4</div>
+                        <h3 class="step-title">Shop & Share</h3>
+                        <p class="step-description">Get size recommendations, purchase with confidence, and share your looks with friends and the community.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Demo Section -->
+        <section class="demo" id="demo">
+            <div class="container">
+                <h2 class="section-title">See Miora in Action</h2>
+                <div class="demo-video">
+                    <p>🎬 Interactive Demo Coming Soon<br>Experience the magic of virtual try-on</p>
+                </div>
+                <a href="#" class="btn btn-primary btn-large" onclick="showSignUp()">Try It Yourself</a>
+            </div>
+        </section>
+
+        <!-- CTA Section -->
+        <section class="cta-section">
+            <div class="container">
+                <h2 class="cta-title">Ready to Transform Your Shopping?</h2>
+                <p class="cta-subtitle">Join thousands of users who've discovered their perfect style with Miora</p>
+                <a href="#" class="btn btn-primary btn-large" onclick="showSignUp()">Start Free Today</a>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="container">
+                <div class="footer-content">
+                    <div class="footer-section">
+                        <h3>Product</h3>
+                        <a href="#">Features</a><br>
+                        <a href="#">How It Works</a><br>
+                        <a href="#">Pricing</a><br>
+                        <a href="#">API</a>
+                    </div>
+                    
+                    <div class="footer-section">
+                        <h3>Company</h3>
+                        <a href="#">About Us</a><br>
+                        <a href="#">Careers</a><br>
+                        <a href="#">Press</a><br>
+                        <a href="#">Contact</a>
+                    </div>
+                    
+                    <div class="footer-section">
+                        <h3>Support</h3>
+                        <a href="#">Help Center</a><br>
+                        <a href="#">Privacy Policy</a><br>
+                        <a href="#">Terms of Service</a><br>
+                        <a href="#">Security</a>
+                    </div>
+                    
+                    <div class="footer-section">
+                        <h3>Connect</h3>
+                        <a href="#">Twitter</a><br>
+                        <a href="#">Instagram</a><br>
+                        <a href="#">LinkedIn</a><br>
+                        <a href="#">Blog</a>
+                    </div>
+                </div>
+                
+                <div class="footer-bottom">
+                    <p>&copy; 2025 Miora. All rights reserved. Made with ❤️ for fashion lovers.</p>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- User Dashboard -->
+    <div class="user-dashboard" id="userDashboard">
+        <div class="app-container">
+            <!-- Navigation -->
+            <nav class="navbar">
+                <div class="logo">Miora</div>
+                <ul class="nav-links">
+                    <li><a href="#" onclick="showSection('try-on')">Try-On Studio</a></li>
+                    <li><a href="#" onclick="showSection('wardrobe')">My Wardrobe</a></li>
+                    <li><a href="#" onclick="showSection('social')">Community</a></li>
+                    <li><a href="#" onclick="showSection('trending')">Trending</a></li>
+                </ul>
+                <div class="user-menu">
+                    <div class="user-avatar">JS</div>
+                    <button class="btn btn-primary" onclick="signOut()">Sign Out</button>
+                </div>
+            </nav>
+
+            <!-- Main Content -->
+            <main class="main-content">
+                <!-- Left Sidebar -->
+                <aside class="sidebar">
+                    <div class="sidebar-section">
+                        <h3>My Avatar</h3>
+                        <div class="avatar-preview">
+                            <div class="avatar-placeholder">
+                                <div class="avatar-head"></div>
+                            </div>
+                        </div>
+                        <button class="btn btn-primary" style="width: 100%;" onclick="openAvatarEditor()">
+                            ✏️ Edit Avatar
+                        </button>
+                    </div>
+
+                    <div class="sidebar-section">
+                        <h3>Quick Wardrobe</h3>
+                        <div class="wardrobe-items">
+                            <div class="wardrobe-item" onclick="tryOnItem('shirt1')">👔</div>
+                            <div class="wardrobe-item" onclick="tryOnItem('pants1')">👖</div>
+                            <div class="wardrobe-item" onclick="tryOnItem('dress1')">👗</div>
+                            <div class="wardrobe-item" onclick="tryOnItem('jacket1')">🧥</div>
+                        </div>
+                    </div>
+
+                    <div class="sidebar-section">
+                        <h3>Recent Outfits</h3>
+                        <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                            <div style="padding: 0.75rem; background: #f8f9fa; border-radius: 10px; cursor: pointer;" onclick="loadOutfit('casual-friday')">
+                                🌟 Casual Friday Look
+                            </div>
+                            <div style="padding: 0.75rem; background: #f8f9fa; border-radius: 10px; cursor: pointer;" onclick="loadOutfit('date-night')">
+                                💫 Date Night Outfit
+                            </div>
+                        </div>
+                    </div>
+                </aside>
+
+                <!-- 3D Viewport -->
+                <div class="viewport-container">
+                    <div class="viewport">
+                        <div class="avatar-3d">👤</div>
+                        
+                        <div class="viewport-controls">
+                            <button class="control-btn" onclick="rotateAvatar('left')" title="Rotate Left">↺</button>
+                            <button class="control-btn" onclick="resetView()" title="Reset View">⌂</button>
+                            <button class="control-btn" onclick="rotateAvatar('right')" title="Rotate Right">↻</button>
+                            <button class="control-btn" onclick="togglePose()" title="Change Pose">🚶</button>
+                            <button class="control-btn" onclick="captureImage()" title="Take Photo">📷</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Panel -->
+                <aside class="right-panel">
+                    <div class="panel-section">
+                        <div class="fit-score">
+                            <div class="fit-score-value">94%</div>
+                            <div class="fit-score-label">Perfect Fit</div>
+                        </div>
+                    </div>
+
+                    <div class="panel-section">
+                        <h3>Size Recommendation</h3>
+                        <div class="size-recommendations">
+                            <div class="size-option">S</div>
+                            <div class="size-option recommended">M</div>
+                            <div class="size-option">L</div>
+                        </div>
+                        <p style="font-size: 0.9rem; color: #666; text-align: center;">
+                            Based on your measurements, we recommend <strong>Medium</strong>
+                        </p>
+                    </div>
+
+                    <div class="panel-section">
+                        <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 15px; margin-bottom: 1.5rem;">
+                            <h4 style="margin-bottom: 0.5rem; color: #333;">Classic Cotton Blend Shirt</h4>
+                            <p style="color: #666; font-size: 0.9rem; line-height: 1.5;">Premium quality cotton blend with a modern slim fit. Perfect for both casual and business occasions.</p>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem;">
+                                <div>
+                                    <span style="font-size: 1.3rem; font-weight: 700; color: #e74c3c;">$79.99</span>
+                                    <span style="text-decoration: line-through; color: #999; margin-left: 0.5rem;">$99.99</span>
+                                </div>
+                                <div style="color: #27ae60; font-weight: 600;">20% OFF</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="panel-section">
+                        <div style="display: flex; flex-direction: column; gap: 1rem;">
+                            <button class="btn btn-primary" style="width: 100%; padding: 1rem; border-radius: 15px; font-weight: 600; font-size: 1rem;" onclick="addToCart()">
+                                🛒 Add to Cart
+                            </button>
+                            <button class="btn btn-secondary" style="width: 100%; padding: 1rem; border-radius: 15px; font-weight: 600; font-size: 1rem; background: transparent; color: #333; border: 2px solid #333;" onclick="saveOutfit()">
+                                💾 Save Outfit
+                            </button>
+                            <button class="btn btn-secondary" style="width: 100%; padding: 1rem; border-radius: 15px; font-weight: 600; font-size: 1rem; background: transparent; color: #333; border: 2px solid #333;" onclick="findSimilar()">
+                                🔍 Find Similar Items
+                            </button>
+                        </div>
+                        
+                        <div style="display: flex; gap: 0.5rem; justify-content: center; margin-top: 1rem;">
+                            <button style="width: 40px; height: 40px; border: none; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: transform 0.3s ease; background: linear-gradient(135deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); color: white;" onclick="shareToSocial('instagram')" title="Share to Instagram">📷</button>
+                            <button style="width: 40px; height: 40px; border: none; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: transform 0.3s ease; background: #000; color: white;" onclick="shareToSocial('tiktok')" title="Share to TikTok">🎵</button>
+                            <button style="width: 40px; height: 40px; border: none; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: transform 0.3s ease; background: #1da1f2; color: white;" onclick="shareToSocial('twitter')" title="Share to Twitter">🐦</button>
+                            <button style="width: 40px; height: 40px; border: none; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: transform 0.3s ease; background: #25d366; color: white;" onclick="shareToSocial('whatsapp')" title="Share to WhatsApp">💬</button>
+                        </div>
+                    </div>
+                </aside>
+            </main>
+
+            <!-- Floating Action Button -->
+            <button class="fab" onclick="addNewGarment()" title="Add New Garment">➕</button>
+        </div>
+    </div>
+
+    <script>
+        // Global state
+        let isAuthenticated = false;
+        let currentUser = null;
+
+        // Landing page functions
+        function showSignIn() {
+            console.log('Opening sign in modal');
+            // In real implementation, this would show a sign-in modal
+            // For demo purposes, let's simulate authentication
+            simulateAuthentication();
+        }
+
+        function showSignUp() {
+            console.log('Opening sign up modal');
+            // In real implementation, this would show a sign-up modal
+            // For demo purposes, let's simulate authentication
+            simulateAuthentication();
+        }
+
+        function simulateAuthentication() {
+            // Simulate successful authentication
+            setTimeout(() => {
+                isAuthenticated = true;
+                currentUser = {
+                    id: 1,
+                    name: "Jane Smith",
+                    email: "jane@example.com",
+                    initials: "JS"
+                };
+                showUserDashboard();
+            }, 1000);
+        }
+
+        function showUserDashboard() {
+            document.getElementById('landingPage').style.display = 'none';
+            document.getElementById('userDashboard').style.display = 'block';
+            
+            // Initialize user dashboard
+            initializeUserDashboard();
+        }
+
+        function showLandingPage() {
+            document.getElementById('landingPage').style.display = 'block';
+            document.getElementById('userDashboard').style.display = 'none';
+        }
+
+        function signOut() {
+            isAuthenticated = false;
+            currentUser = null;
+            showLandingPage();
+        }
+
+        // Dashboard functions
+        function initializeUserDashboard() {
+            console.log('Initializing user dashboard for:', currentUser.name);
+            // Load user's avatars, wardrobe, recent outfits
+            // Initialize 3D scene
+            // Set up real-time connections
+        }
+
+        function openAvatarEditor() {
+            console.log('Opening avatar editor...');
+            // This would navigate to avatar creation/editing interface
+        }
+
+        function tryOnItem(itemId) {
+            console.log(`Trying on item: ${itemId}`);
+            // Simulate virtual try-on process
+            updateFitScore(Math.floor(Math.random() * 20) + 80);
+        }
+
+        function loadOutfit(outfitId) {
+            console.log(`Loading outfit: ${outfitId}`);
+            tryOnItem(outfitId);
+        }
+
+        // 3D viewport controls
+        function rotateAvatar(direction) {
+            console.log(`Rotating avatar: ${direction}`);
+        }
+
+        function resetView() {
+            console.log('Resetting view');
+        }
+
+        function togglePose() {
+            console.log('Changing pose');
+        }
+
+        function captureImage() {
+            console.log('Capturing image');
+        }
+
+        // Action functions
+        function addToCart() {
+            console.log('Adding to cart');
+            // Show success notification
+            showNotification('Added to cart successfully! 🛒');
+        }
+
+        function saveOutfit() {
+            console.log('Saving outfit');
+            showNotification('Outfit saved! 💾');
+        }
+
+        function findSimilar() {
+            console.log('Finding similar items');
+        }
+
+        function shareToSocial(platform) {
+            console.log(`Sharing to ${platform}`);
+            showNotification(`Shared to ${platform}! ✨`);
+        }
+
+        function addNewGarment() {
+            console.log('Adding new garment');
+        }
+
+        function showSection(section) {
+            console.log(`Navigating to: ${section}`);
+        }
+
+        // Utility functions
+        function updateFitScore(score) {
+            const scoreElement = document.querySelector('.fit-score-value');
+            const labelElement = document.querySelector('.fit-score-label');
+            
+            if (scoreElement && labelElement) {
+                scoreElement.textContent = `${score}%`;
+                
+                if (score >= 90) {
+                    labelElement.textContent = 'Perfect Fit';
+                    scoreElement.parentElement.style.background = 'linear-gradient(135deg, #a8e6cf, #88d8a3)';
+                } else if (score >= 75) {
+                    labelElement.textContent = 'Good Fit';
+                    scoreElement.parentElement.style.background = 'linear-gradient(135deg, #ffd93d, #ff6b6b)';
+                } else {
+                    labelElement.textContent = 'Poor Fit';
+                    scoreElement.parentElement.style.background = 'linear-gradient(135deg, #ff6b6b, #ee5a24)';
+                }
+            }
+        }
+
+        function showNotification(message) {
+            // Create a simple notification
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 100px;
+                right: 20px;
+                background: linear-gradient(135deg, #667eea, #764ba2);
+                color: white;
+                padding: 1rem 2rem;
+                border-radius: 10px;
+                z-index: 10000;
+                box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+                animation: slideIn 0.3s ease-out;
+            `;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.animation = 'slideOut 0.3s ease-in';
+                setTimeout(() => document.body.removeChild(notification), 300);
+            }, 3000);
+        }
+
+        // Smooth scrolling for landing page links
+        document.addEventListener('DOMContentLoaded', function() {
+            const links = document.querySelectorAll('a[href^="#"]');
+            links.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    if (this.getAttribute('href').startsWith('#')) {
+                        e.preventDefault();
+                        const target = document.querySelector(this.getAttribute('href'));
+                        if (target) {
+                            target.scrollIntoView({
+                                behavior: 'smooth',
+                                block: 'start'
+                            });
+                        }
+                    }
+                });
+            });
+
+            // Add scroll animations
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            }, observerOptions);
+
+            document.querySelectorAll('.slide-up').forEach(el => {
+                el.style.opacity = '0';
+                el.style.transform = 'translateY(50px)';
+                el.style.transition = 'opacity 0.8s ease, transform 0.8s ease';
+                observer.observe(el);
+            });
+        });
+
+        // Add some CSS animations
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            
+            @keyframes slideOut {
+                from { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(100%); opacity: 0; }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>

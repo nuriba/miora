@@ -1,0 +1,28 @@
+{% extends "emails/base.html" %}
+
+{% block title %}Welcome to Miora!{% endblock %}
+
+{% block content %}
+<h2>Welcome to Miora! 🎉</h2>
+
+<p>Hi {{ user.email }},</p>
+
+<p>Thank you for joining Miora - your personal virtual fashion try-on platform!</p>
+
+<p>Here's what you can do next:</p>
+
+<ul>
+    <li>Create your first avatar with your measurements</li>
+    <li>Import clothes from your favorite brands</li>
+    <li>Try on outfits virtually before you buy</li>
+    <li>Save and share your favorite looks</li>
+</ul>
+
+<div style="text-align: center;">
+    <a href="{{ settings.FRONTEND_URL }}/dashboard" class="button">Get Started</a>
+</div>
+
+<p>If you have any questions, feel free to reach out to our support team.</p>
+
+<p>Happy shopping!<br>The Miora Team</p>
+{% endblock %}
