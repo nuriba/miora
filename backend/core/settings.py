@@ -44,6 +44,8 @@ INSTALLED_APPS = [
     'try_on',
     'recommendations',
     'analytics',
+    'community',
+    'insights',
 ]
 
 MIDDLEWARE = [

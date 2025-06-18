@@ -106,3 +106,47 @@ class OutfitGarment(models.Model):
         db_table = 'outfit_garments'
         unique_together = ['outfit', 'layer_order']
         ordering = ['layer_order']
+
+
+class OutfitTemplate(models.Model):
+    """Pre-defined outfit combinations"""
+    name = models.CharField(max_length=100)
+    description = models.TextField()
+    occasion = models.CharField(max_length=50, choices=[
+        ('casual', 'Casual'),
+        ('business', 'Business'),
+        ('formal', 'Formal'),
+        ('sport', 'Sport'),
+        ('party', 'Party'),
+    ])
+    season = models.CharField(max_length=20, choices=[
+        ('spring', 'Spring'),
+        ('summer', 'Summer'),
+        ('autumn', 'Autumn'),
+        ('winter', 'Winter'),
+        ('all', 'All Seasons'),
+    ])
+    style_tags = models.JSONField(default=list)
+    
+class StyleRule(models.Model):
+    """Fashion rules for outfit compatibility"""
+    name = models.CharField(max_length=100)
+    rule_type = models.CharField(max_length=50, choices=[
+        ('color_match', 'Color Matching'),
+        ('pattern_mix', 'Pattern Mixing'),
+        ('formality', 'Formality Level'),
+        ('seasonal', 'Seasonal Appropriateness'),
+    ])
+    compatible_items = models.JSONField()  # List of compatible categories/styles
+    incompatible_items = models.JSONField()  # List of incompatible items
+    confidence_score = models.FloatField(default=1.0)
+
+class OutfitRating(models.Model):
+    """Community ratings for outfits"""
+    outfit = models.ForeignKey(Outfit, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    rating = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)])
+    style_score = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(10)])
+    fit_score = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(10)])
+    comment = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
