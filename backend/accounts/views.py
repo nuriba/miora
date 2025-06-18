@@ -158,6 +158,19 @@ class PasswordResetConfirmView(APIView):
         }, status=status.HTTP_200_OK)
 
 
+class CheckUsernameView(APIView):
+    """Check if username is available."""
+    permission_classes = [permissions.AllowAny]
+    
+    def get(self, request):
+        username = request.query_params.get('username', '').lower()
+        if not username:
+            return Response({'error': 'Username parameter required'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        available = not User.objects.filter(username=username).exists()
+        return Response({'available': available})
+
+
 @api_view(['POST'])
 @permission_classes([permissions.IsAuthenticated])
 def logout_view(request):

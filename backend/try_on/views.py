@@ -1,6 +1,7 @@
 from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from django.shortcuts import get_object_or_404
 from django.db import transaction
 from .models import TryOnSession, TryOnSessionGarment, Outfit, OutfitGarment
@@ -14,6 +15,8 @@ from .serializers import (
 )
 from .services import VirtualTryOnService
 from recommendations.services import SizeRecommendationService
+from common.services.flora_fauna_service import FloraFaunaService
+from common.services.revery_ai_service import ReveryAIService
 
 
 class TryOnSessionViewSet(viewsets.ModelViewSet):
@@ -234,3 +237,51 @@ class OutfitViewSet(viewsets.ModelViewSet):
             'detail': 'Try-on session created.',
             'session_id': str(session.id)
         })
+
+
+class TryOnView(APIView):
+    """Enhanced virtual try-on with Flora Fauna (primary) and Revery AI (fallback)."""
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        avatar_id = request.data.get("avatar_id")
+        garment_id = request.data.get("garment_id")
+        
+        if not avatar_id or not garment_id:
+            return Response(
+                {"error": "avatar_id and garment_id are required"}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        avatar = get_object_or_404(Avatar, id=avatar_id, user=request.user)
+        garment = get_object_or_404(Garment, id=garment_id)
+
+        # Try Flora Fauna first
+        flora = FloraFaunaService()
+        try:
+            result = flora.create_try_on(
+                model_image=avatar.full_body_image_url,
+                garment_image=getattr(garment, 'cleaned_image_url', garment.image_url),
+                garment_type=garment.category
+            )
+        except Exception as e:
+            # Fallback to Revery AI
+            try:
+                revery = ReveryAIService()
+                result = revery.try_on(
+                    avatar.full_body_image_url,
+                    getattr(garment, 'cleaned_image_url', garment.image_url),
+                    garment.category
+                )
+            except Exception as fallback_error:
+                return Response(
+                    {"error": f"Both services failed: {str(e)}, {str(fallback_error)}"}, 
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
+
+        # Save the result (you may need to create TryOnResult model)
+        return Response({
+            'image_url': result.get("output_url") or result.get("result_url"),
+            'avatar_id': str(avatar.id),
+            'garment_id': str(garment.id)
+        }, status=status.HTTP_200_OK)

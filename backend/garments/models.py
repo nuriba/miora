@@ -45,9 +45,11 @@ class Garment(models.Model):
     
     # Images and 3D model
     original_image_url = models.URLField(max_length=500)
+    cleaned_image_url = models.URLField(max_length=500, blank=True)  # Background removed
     thumbnail_url = models.URLField(max_length=500, blank=True)
     model_3d_url = models.URLField(max_length=500, blank=True)
     texture_urls = models.JSONField(default=list, blank=True)
+    features = models.JSONField(default=dict, blank=True)  # AI-detected features
     
     # Garment metadata
     source_url = models.URLField(max_length=500, blank=True)
@@ -74,6 +76,11 @@ class Garment(models.Model):
             models.Index(fields=['processing_status']),
         ]
     
+    @property
+    def image_url(self):
+        """Backward compatibility property."""
+        return self.original_image_url
+
     def __str__(self):
         return f"{self.name} ({self.category})"
 

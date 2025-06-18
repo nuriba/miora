@@ -7,6 +7,7 @@ from .views import (
     PasswordChangeView,
     PasswordResetView,
     PasswordResetConfirmView,
+    CheckUsernameView,
     logout_view
 )
 
@@ -17,6 +18,7 @@ urlpatterns = [
     path('register/', UserRegistrationView.as_view(), name='register'),
     path('login/', CustomTokenObtainPairView.as_view(), name='login'),
     path('logout/', logout_view, name='logout'),
+    path('check-username/', CheckUsernameView.as_view(), name='check_username'),
     
     # Token management
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),

@@ -17,6 +17,18 @@ cryptography==41.0.7
 # Image Processing
 Pillow>=10.2.0
 boto3==1.29.7  # For AWS S3
+cloudinary==1.44.1
+
+# AI/ML Services
+transformers==4.52.4
+torch>=2.0.0  # Required by transformers
+
+# External APIs
+mixpanel==4.10.1
+sendgrid==6.12.4
+
+# Environment
+python-dotenv==1.0.0
 
 # Background Tasks
 celery==5.3.4
